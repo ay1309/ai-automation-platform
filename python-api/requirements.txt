@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+openai
+psycopg2-binary
+sqlalchemy
+redis
+python-dotenv
+sentence-transformers
+pinecone
+pymupdf
+langchain
+uvicorn[standard] 
+chromadb
+sentence-transformers
+pypdf
+numpy

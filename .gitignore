@@ -216,3 +216,20 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Python bytecode
+*.pyc
+
+
+# Node
+node_modules/
+
+
+
+# Docker
+postgres/
+redis/
+
+# OS
+.DS_Store
+Thumbs.db
