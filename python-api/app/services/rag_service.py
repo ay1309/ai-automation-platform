@@ -2,32 +2,32 @@ import os
 import glob
 import chromadb
 
-from dotenv import load_dotenv
-from openai import OpenAI
+from langchain_text_splitters import (
+    RecursiveCharacterTextSplitter
+)
 
-from sentence_transformers import SentenceTransformer
+from app.services.embedding_service import (
+    create_embedding
+)
 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from pypdf import PdfReader
+from app.services.openai_service import (
+    client
+)
 
+from app.services.pdf_service import (
+    extract_text_from_pdf
+)
 
-load_dotenv()
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-client = OpenAI(api_key=OPENAI_API_KEY)
-
-# Embedding model
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-
-# ChromaDB
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
+# chroma
+chroma_client = chromadb.PersistentClient(
+    path="./chroma_db"
+)
 
 collection = chroma_client.get_or_create_collection(
     name="documents"
 )
 
-# Text splitter
+# splitter
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=1000,
     chunk_overlap=200
@@ -35,65 +35,68 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 
 def ingest_documents():
+
     documents_path = "/app/documents"
 
-    if not os.path.exists(documents_path):
-        return {
-            "error": "documents folder not found"
-        }
-
-    pdf_files = glob.glob(f"{documents_path}/*.pdf")
-
-    if len(pdf_files) == 0:
-        return {
-            "error": "no pdf files found"
-        }
+    pdf_files = glob.glob(
+        f"{documents_path}/*.pdf"
+    )
 
     all_chunks = []
 
+    all_metadatas = []
+
+    all_ids = []
+
+    counter = 0
+
     for pdf_file in pdf_files:
 
-        pdf_reader = PdfReader(pdf_file)
-
-        text = ""
-
-        for page in pdf_reader.pages:
-            extracted = page.extract_text()
-
-            if extracted:
-                text += extracted
+        text = extract_text_from_pdf(pdf_file)
 
         chunks = text_splitter.split_text(text)
 
-        all_chunks.extend(chunks)
+        for chunk in chunks:
 
-    if len(all_chunks) == 0:
-        return {
-            "error": "no text extracted"
-        }
+            all_chunks.append(chunk)
 
-    embeddings = embedding_model.encode(all_chunks).tolist()
+            all_metadatas.append({
+                "source": os.path.basename(pdf_file)
+            })
 
-    ids = [f"doc_{i}" for i in range(len(all_chunks))]
+            all_ids.append(f"doc_{counter}")
+
+            counter += 1
+
+    embeddings = [
+        create_embedding(chunk)
+        for chunk in all_chunks
+    ]
 
     collection.add(
         documents=all_chunks,
         embeddings=embeddings,
-        ids=ids
+        metadatas=all_metadatas,
+        ids=all_ids
     )
 
     return {
-        "message": f"{len(all_chunks)} chunks ingested successfully"
+        "message": f"{len(all_chunks)} chunks ingested"
     }
 
 
-def search_documents(query, n_results=5):
+def search_documents(query):
 
-    query_embedding = embedding_model.encode(query).tolist()
+    query_embedding = create_embedding(query)
 
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=n_results
+        n_results=5,
+        include=[
+            "documents",
+            "metadatas",
+            "distances"
+        ]
     )
 
     return results
@@ -102,26 +105,17 @@ def search_documents(query, n_results=5):
 def ask_rag(question):
 
     results = search_documents(question)
-    
-    print(results)
 
     documents = results["documents"][0]
 
-    # safeguard in case nothing is found
-    if not documents:
-        return {
-            "answer": "No relevant documents found.",
-            "sources": []
-        }
+    metadatas = results["metadatas"][0]
 
     context = "\n\n".join(documents)
 
     prompt = f"""
-You are a helpful AI assistant.
+You are an enterprise AI assistant.
 
-Answer the question ONLY using the context below.
-If the answer is not in the context, say:
-"I could not find the answer in the provided documents."
+Answer ONLY using the context below.
 
 Context:
 {context}
@@ -134,10 +128,6 @@ Question:
         model="gpt-4o-mini",
         messages=[
             {
-                "role": "system",
-                "content": "You answer questions using only retrieved document context."
-            },
-            {
                 "role": "user",
                 "content": prompt
             }
@@ -148,5 +138,5 @@ Question:
 
     return {
         "answer": answer,
-        "sources": documents
+        "sources": metadatas
     }

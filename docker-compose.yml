@@ -1,7 +1,12 @@
+version: "3.9"
+
 services:
 
   postgres:
     image: postgres:16
+
+    container_name: postgres-db
+
     restart: always
 
     environment:
@@ -9,21 +14,40 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: automation
 
-    volumes:
-      - ./postgres:/var/lib/postgresql/data
-
     ports:
       - "5432:5432"
 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7
+
+    container_name: redis-cache
+
     restart: always
 
     ports:
       - "6379:6379"
 
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   python-api:
-    build: ./python-api
+    build:
+      context: ./python-api
 
     container_name: fastapi-backend
 
@@ -32,8 +56,12 @@ services:
     ports:
       - "8000:8000"
 
+    env_file:
+      - .env
+
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      DATABASE_URL: postgresql://admin:password@postgres:5432/automation
 
     volumes:
       - ./python-api:/app
@@ -41,5 +69,18 @@ services:
       - ./chroma_db:/app/chroma_db
 
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+
+volumes:
+  postgres_data:
+  redis_data:
