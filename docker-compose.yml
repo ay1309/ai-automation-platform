@@ -38,6 +38,7 @@ services:
     volumes:
       - ./python-api:/app
       - ./documents:/app/documents
+      - ./chroma_db:/app/chroma_db
 
     depends_on:
       - postgres
