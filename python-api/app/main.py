@@ -11,10 +11,19 @@ from app.db.models import Base
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="AI Automation Platform"
+    title="AFMB - AI Automation Platform"
 )
+
+@app.get("/")
+async def root():
+
+    return {
+        "message": "AFMB - AI Automation Platform API Running"
+    }
 
 # routers
 app.include_router(chat.router)
 app.include_router(rag.router)
 app.include_router(health.router)
+
+

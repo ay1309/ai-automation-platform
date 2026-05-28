@@ -18,21 +18,18 @@ from app.services.pdf_service import (
     extract_text_from_pdf
 )
 
-# chroma
 chroma_client = chromadb.PersistentClient(
-    path="./chroma_db"
+    path="/app/chroma_db"
 )
 
 collection = chroma_client.get_or_create_collection(
     name="documents"
 )
 
-# splitter
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=1000,
     chunk_overlap=200
 )
-
 
 def ingest_documents():
 
@@ -42,31 +39,50 @@ def ingest_documents():
         f"{documents_path}/*.pdf"
     )
 
+    if not pdf_files:
+        return {
+            "message": "No PDF files found",
+            "chunks": 0
+        }
+
     all_chunks = []
-
     all_metadatas = []
-
     all_ids = []
 
     counter = 0
 
     for pdf_file in pdf_files:
 
-        text = extract_text_from_pdf(pdf_file)
+        pages = extract_text_from_pdf(pdf_file)
 
-        chunks = text_splitter.split_text(text)
+        for page_data in pages:
 
-        for chunk in chunks:
+            page_number = page_data["page"]
+            page_text = page_data["text"]
 
-            all_chunks.append(chunk)
+            chunks = text_splitter.split_text(page_text)
 
-            all_metadatas.append({
-                "source": os.path.basename(pdf_file)
-            })
+            for chunk in chunks:
 
-            all_ids.append(f"doc_{counter}")
+                all_chunks.append(chunk)
+               
+                all_metadatas.append({
+                    "source": os.path.basename(pdf_file),
+                    "page": page_number,
+                    "chunk": counter
+                })
 
-            counter += 1
+                all_ids.append(
+                    f"{os.path.basename(pdf_file)}_page_{page_number}_chunk_{counter}"
+                )
+
+                counter += 1
+
+    if not all_chunks:
+        return {
+            "message": "No text extracted from PDFs",
+            "chunks": 0
+        }
 
     embeddings = [
         create_embedding(chunk)
@@ -81,9 +97,9 @@ def ingest_documents():
     )
 
     return {
-        "message": f"{len(all_chunks)} chunks ingested"
+        "message": "Documents ingested successfully",
+        "chunks": len(all_chunks)
     }
-
 
 def search_documents(query):
 
@@ -101,14 +117,19 @@ def search_documents(query):
 
     return results
 
-
 def ask_rag(question):
 
     results = search_documents(question)
 
     documents = results["documents"][0]
-
     metadatas = results["metadatas"][0]
+    distances = results["distances"][0]
+
+    if not documents:
+        return {
+            "answer": "No relevant documents found.",
+            "sources": []
+        }
 
     context = "\n\n".join(documents)
 
@@ -116,6 +137,8 @@ def ask_rag(question):
 You are an enterprise AI assistant.
 
 Answer ONLY using the context below.
+If the answer is not in the context, say:
+"I could not find the answer in the provided documents."
 
 Context:
 {context}
@@ -128,6 +151,10 @@ Question:
         model="gpt-4o-mini",
         messages=[
             {
+                "role": "system",
+                "content": "You answer questions using only retrieved document context."
+            },
+            {
                 "role": "user",
                 "content": prompt
             }
@@ -136,7 +163,21 @@ Question:
 
     answer = response.choices[0].message.content
 
+    sources = []
+
+    for metadata, distance in zip(metadatas, distances):
+
+        if metadata is None:
+            metadata = {}
+
+        sources.append({
+            "source": metadata.get("source", "unknown"),
+            "page": metadata.get("page", None),
+            "chunk": metadata.get("chunk", None),
+            "distance": distance
+        })
+
     return {
         "answer": answer,
-        "sources": metadatas
+        "sources": sources
     }

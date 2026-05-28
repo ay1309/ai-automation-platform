@@ -80,6 +80,32 @@ services:
       --host 0.0.0.0
       --port 8000
       --reload
+    
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    restart: always
+
+    ports:
+      - "5678:5678"
+
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: automation
+      DB_POSTGRESDB_USER: admin
+      DB_POSTGRESDB_PASSWORD: password
+
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678/
+
+    depends_on:
+      - postgres
+      - redis
+      - python-api
 
 volumes:
   postgres_data:
