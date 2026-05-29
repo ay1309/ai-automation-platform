@@ -12,13 +12,19 @@ class Conversation(Base):
 
     __tablename__ = "conversations"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
     user_message = Column(Text)
 
     ai_response = Column(Text)
 
+    sources = Column(Text, nullable=True)
+
     created_at = Column(
         DateTime,
-        default=datetime
+        default=datetime.utcnow
     )

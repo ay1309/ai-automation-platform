@@ -9,6 +9,8 @@ from app.routes import documents
 from app.db.database import engine
 from app.db.models import Base
 
+from app.routes import conversations
+
 
 # create tables
 Base.metadata.create_all(bind=engine)
@@ -33,6 +35,7 @@ app.add_middleware(
 app.include_router(chat.router)
 app.include_router(rag.router)
 app.include_router(documents.router)
+app.include_router(conversations.router)
 app.include_router(health.router)
 
 

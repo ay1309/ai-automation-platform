@@ -1,5 +1,6 @@
 import ChatBox from "./components/ChatBox";
 import UploadBox from "./components/UploadBox";
+import ConversationHistory from "./components/ConversationHistory";
 import "./styles/app.css";
 
 function App() {
@@ -12,7 +13,9 @@ function App() {
                 </p>
 
                 <UploadBox />
+                <ConversationHistory />
             </aside>
+        
 
             <main className="main-content">
                 <ChatBox />

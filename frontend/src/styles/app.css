@@ -134,3 +134,29 @@ textarea {
     color: #93c5fd;
     font-size: 14px;
 }
+
+.history-box {
+    margin-top: 24px;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 16px;
+    padding: 16px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.history-item {
+    border-bottom: 1px solid #374151;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.history-item p {
+    color: #d1d5db;
+    font-size: 13px;
+}
+
+.muted-text {
+    color: #9ca3af;
+    font-size: 13px;
+}
