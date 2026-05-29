@@ -1,126 +1,88 @@
 import { useState } from "react";
-
 import api from "../services/api";
-
 import MessageBubble from "./MessageBubble";
 
 function ChatBox() {
-
     const [message, setMessage] = useState("");
-
     const [messages, setMessages] = useState([]);
-
     const [loading, setLoading] = useState(false);
 
-
     async function sendMessage() {
-
         if (!message.trim()) return;
 
-        const userMessage = {
-            role: "user",
-            content: message
-        };
+        const currentMessage = message;
 
         setMessages((prev) => [
             ...prev,
-            userMessage
+            {
+                role: "user",
+                content: currentMessage,
+            },
         ]);
 
+        setMessage("");
         setLoading(true);
 
         try {
-
-            const res = await api.post(
-                "/webhook/support-rag",
-                {
-                    message: message
-                }
-            );
-
-            const aiMessage = {
-                role: "assistant",
-                content: res.data.answer,
-                sources: res.data.sources || []
-            };
+            const res = await api.post("/webhook/support-rag", {
+                message: currentMessage,
+            });
 
             setMessages((prev) => [
                 ...prev,
-                aiMessage
+                {
+                    role: "assistant",
+                    content: res.data.answer || "No answer received.",
+                    sources: res.data.sources || [],
+                },
             ]);
-
         } catch (error) {
-
             console.error(error);
 
-            const errorMessage = {
-                role: "assistant",
-                content: "Request failed"
-            };
-
             setMessages((prev) => [
                 ...prev,
-                errorMessage
+                {
+                    role: "assistant",
+                    content: "Error: Request failed.",
+                    sources: [],
+                },
             ]);
         }
-
-        setMessage("");
 
         setLoading(false);
     }
 
-
     return (
-
-        <div style={{
-            padding: "40px",
-            fontFamily: "Arial"
-        }}>
-
-            <h1>
-                Enterprise Assistant - AFMB
-            </h1>
-
-            {/* CHAT HISTORY */}
+        <section className="chat-section">
+            <h1>Enterprise Assistant - AFMB</h1>
 
             <div className="messages-container">
-
                 {messages.map((msg, index) => (
-
-                    <MessageBubble
-                        key={index}
-                        message={msg}
-                    />
-
+                    <MessageBubble key={index} message={msg} />
                 ))}
 
+                {loading && (
+                    <div className="assistant-row message-row">
+                        <div className="message-bubble assistant-bubble">
+                            Thinking
+                        </div>
+                    </div>
+                )}
             </div>
 
-            <br />
+            <div className="input-area">
+                <textarea
+                    value={message}
+                    placeholder="Ask something about the uploaded documents"
+                    onChange={(e) => setMessage(e.target.value)}
+                />
 
-            {/* INPUT */}
-
-            <textarea
-                rows="5"
-                cols="50"
-                value={message}
-                onChange={(e) =>
-                    setMessage(e.target.value)
-                }
-            />
-
-            <br /><br />
-
-            <button onClick={sendMessage}>
-                Ask
-            </button>
-
-            <br /><br />
-
-            {loading && <p>Loading</p>}
-
-        </div>
+                <button onClick={sendMessage} disabled={loading}>
+                    {loading ? "Thinking..." : "Ask"}
+                </button>
+            </div>
+        </section>
     );
 }
 
-export default ChatBox; 
+export default ChatBox;

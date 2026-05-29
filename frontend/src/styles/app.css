@@ -1,0 +1,136 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: #f9fafb;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 320px;
+    background: #020617;
+    border-right: 1px solid #1f2937;
+    padding: 24px;
+}
+
+.sidebar-text {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.main-content {
+    flex: 1;
+    padding: 40px;
+}
+
+.chat-section {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.chat-section h1 {
+    text-align: center;
+    font-size: 48px;
+    margin-bottom: 30px;
+}
+
+.upload-box {
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 24px;
+}
+
+.upload-box input {
+    width: 100%;
+    margin: 14px 0;
+}
+
+button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: #6b7280;
+    cursor: not-allowed;
+}
+
+.input-area {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+textarea {
+    flex: 1;
+    min-height: 100px;
+    background: #1f2937;
+    color: white;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.messages-container {
+    min-height: 260px;
+    margin-top: 30px;
+}
+
+.message-row {
+    display: flex;
+    margin-bottom: 16px;
+}
+
+.user-row {
+    justify-content: flex-end;
+}
+
+.assistant-row {
+    justify-content: flex-start;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 14px 18px;
+    border-radius: 16px;
+    line-height: 1.5;
+}
+
+.user-bubble {
+    background: #2563eb;
+}
+
+.assistant-bubble {
+    background: #1f2937;
+    border: 1px solid #374151;
+}
+
+.sources-box {
+    margin-top: 12px;
+    padding: 12px;
+    background: #020617;
+    border-radius: 12px;
+    font-size: 13px;
+}
+
+.source-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+    color: #d1d5db;
+}
+
+.status-text {
+    color: #93c5fd;
+    font-size: 14px;
+}

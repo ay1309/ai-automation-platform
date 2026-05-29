@@ -1,5 +1,5 @@
 {
-  "name": "RAG Support Assistant",
+  "name": "rag-support-assistant",
   "nodes": [
     {
       "parameters": {
@@ -61,8 +61,6 @@
     },
     {
       "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\n  \"answer\": \"{{$json.answer}}\",\n  \"sources\": \"{{$json.sources}}\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
@@ -116,7 +114,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "e217a1d9-43b6-4efd-9382-08e6165b3c35",
+  "versionId": "4a31a7fb-9764-4acd-a5f0-d54dd24b6e3a",
   "meta": {
     "instanceId": "80fd533a2771b27b7d56568373ecff3b8fa84e2d301034f5fbcbc173edcd1cf1"
   },

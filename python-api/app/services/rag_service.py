@@ -27,8 +27,8 @@ collection = chroma_client.get_or_create_collection(
 )
 
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,
-    chunk_overlap=200
+    chunk_size=1500,
+    chunk_overlap=300
 )
 
 def ingest_documents():
@@ -107,7 +107,7 @@ def search_documents(query):
 
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=5,
+        n_results=15,
         include=[
             "documents",
             "metadatas",
@@ -136,9 +136,10 @@ def ask_rag(question):
     prompt = f"""
 You are an enterprise AI assistant.
 
-Answer ONLY using the context below.
-If the answer is not in the context, say:
-"I could not find the answer in the provided documents."
+Use the context below to answer the question.
+If the context is partially relevant, summarize the relevant information.
+If the exact answer is not present, explain what related information was found.
+Do not invent information outside the context."
 
 Context:
 {context}

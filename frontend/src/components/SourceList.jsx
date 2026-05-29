@@ -1,5 +1,18 @@
 function SourceList({ sources }) {
-    if (!sources || sources.length === 0) {
+    let safeSources = [];
+
+    if (Array.isArray(sources)) {
+        safeSources = sources;
+    } else if (typeof sources === "string") {
+        try {
+            const parsed = JSON.parse(sources);
+            safeSources = Array.isArray(parsed) ? parsed : [];
+        } catch {
+            safeSources = [];
+        }
+    }
+
+    if (safeSources.length === 0) {
         return null;
     }
 
@@ -7,17 +20,16 @@ function SourceList({ sources }) {
         <div className="sources-box">
             <h4>Sources</h4>
 
-            {sources.map((source, index) => (
+            {safeSources.map((source, index) => (
                 <div key={index} className="source-item">
-                    <strong>{source.source || "Unknown file"}</strong>
-                    <span>Page: {source.page ?? "N/A"}</span>
-                    <span>Chunk: {source.chunk ?? "N/A"}</span>
+                    <strong>{source?.source || "Unknown file"}</strong>
+                    <span>Page: {source?.page ?? "N/A"}</span>
+                    <span>Chunk: {source?.chunk ?? "N/A"}</span>
                     <span>
-                        Distance: {
-                            source.distance
-                                ? source.distance.toFixed(4)
-                                : "N/A"
-                        }
+                        Distance:{" "}
+                        {typeof source?.distance === "number"
+                            ? source.distance.toFixed(4)
+                            : "N/A"}
                     </span>
                 </div>
             ))}
