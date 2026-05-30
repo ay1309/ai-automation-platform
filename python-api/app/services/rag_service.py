@@ -182,3 +182,22 @@ Question:
         "answer": answer,
         "sources": sources
     }
+
+def reset_knowledge_base():
+
+    global collection
+
+    chroma_client.delete_collection(
+        name="documents"
+    )
+
+    collection = chroma_client.get_or_create_collection(
+        name="documents"
+    )
+
+    ingest_result = ingest_documents()
+
+    return {
+        "message": "Knowledge base reset successfully",
+        "ingest_result": ingest_result
+    }

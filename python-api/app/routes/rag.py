@@ -12,6 +12,8 @@ from app.services.rag_service import (
 from app.db.database import SessionLocal
 from app.db.models import Conversation
 
+from app.services.rag_service import reset_knowledge_base
+
 router = APIRouter()
 
 
@@ -41,3 +43,9 @@ async def ask(req: ChatRequest):
     db.close()
 
     return result
+
+@router.post("/reindex")
+async def reindex():
+
+    return reset_knowledge_base()
+

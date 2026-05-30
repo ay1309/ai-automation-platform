@@ -1,6 +1,8 @@
 import { useState } from "react";
-import api from "../services/api";
+// import api from "../services/api";
 import MessageBubble from "./MessageBubble";
+import { N8N_WEBHOOK_URL } from "../services/apiConfig";
+import axios from "axios";
 
 function ChatBox() {
     const [message, setMessage] = useState("");
@@ -24,7 +26,8 @@ function ChatBox() {
         setLoading(true);
 
         try {
-            const res = await api.post("/webhook/support-rag", {
+            
+            const res = await axios.post(N8N_WEBHOOK_URL, {
                 message: currentMessage,
             });
 
@@ -54,7 +57,7 @@ function ChatBox() {
 
     return (
         <section className="chat-section">
-            <h1>Enterprise Assistant - AFMB</h1>
+            <h1>Talent Acquisition - AI Assistant</h1>
 
             <div className="messages-container">
                 {messages.map((msg, index) => (
@@ -73,12 +76,12 @@ function ChatBox() {
             <div className="input-area">
                 <textarea
                     value={message}
-                    placeholder="Ask something about the uploaded documents"
+                    placeholder="Ask something about the candidates or job details"
                     onChange={(e) => setMessage(e.target.value)}
                 />
 
                 <button onClick={sendMessage} disabled={loading}>
-                    {loading ? "Thinking..." : "Ask"}
+                    {loading ? "Thinking, please wait" : "Ask"}
                 </button>
             </div>
         </section>

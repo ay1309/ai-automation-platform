@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_URL } from "../services/apiConfig";
 
 function ConversationHistory() {
     const [conversations, setConversations] = useState([]);
@@ -11,7 +12,7 @@ function ConversationHistory() {
 
             try {
                 const res = await axios.get(
-                    "http://localhost:8000/conversations"
+                    `${API_URL}/conversations`
                 );
 
                 setConversations(res.data);

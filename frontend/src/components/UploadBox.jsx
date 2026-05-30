@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { API_URL } from "../services/apiConfig";
 
 function UploadBox() {
     const [file, setFile] = useState(null);
@@ -16,10 +17,10 @@ function UploadBox() {
         formData.append("file", file);
 
         setLoading(true);
-        setStatus("Uploading PDF...");
+        setStatus("Uploading PDF");
 
         try {
-            await axios.post("http://localhost:8000/upload", formData, {
+            await axios.post(`${API_URL}/upload`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -27,7 +28,7 @@ function UploadBox() {
 
             setStatus("PDF uploaded. Now ingesting...");
 
-            const ingestRes = await axios.post("http://localhost:8000/ingest");
+            const ingestRes = await axios.post(`${API_URL}/ingest`);   
 
             setStatus(ingestRes.data.message || "PDF uploaded and ingested.");
         } catch (error) {
