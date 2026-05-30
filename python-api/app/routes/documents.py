@@ -9,6 +9,11 @@ router = APIRouter()
 
 DOCUMENTS_PATH = "/app/documents"
 
+DOCUMENTS_PATH = os.getenv(
+    "DOCUMENTS_PATH",
+    "/app/documents"
+)
+
 
 @router.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
