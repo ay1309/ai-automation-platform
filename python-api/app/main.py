@@ -5,18 +5,19 @@ from app.routes import chat
 from app.routes import rag
 from app.routes import health
 from app.routes import documents
+from app.routes import conversations
 
 from app.db.database import engine
 from app.db.models import Base
-
-from app.routes import conversations
 
 
 # create tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="AFMB - AI Automation Platform"
+    title="AFMB Talent Assistant API",
+    description="FastAPI backend for AFMB Talent Assistant with RAG, document upload, and conversation history.",
+    version="1.0.0"
 )
 
 app.add_middleware(
@@ -24,6 +25,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:5174",
+        "https://afmb-talent-assistant.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -42,7 +44,7 @@ app.include_router(health.router)
 @app.get("/")
 async def root():
     return {
-        "message": "AFMB - AI Automation Platform API Running",
+        "message": "AFMB Talent Assistant API Running",
         "docs": "/docs",
         "health": "/health"
     }
